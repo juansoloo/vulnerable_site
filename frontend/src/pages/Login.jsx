@@ -1,40 +1,35 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-export default function Login() {
-  const [form, setForm] = useState({ username: "", password: "" });
+export default function Login({ setUsername }) {
+  const [username, setLocalUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("http://localhost:5050/api/auth/login", form);
-      localStorage.setItem("username", res.data.username);
-      navigate("/blog");
-    } catch (err) {
-      alert("Login failed");
-    }
-  };
-
-  const handleRegister = async () => {
-    try {
-      await axios.post("http://localhost:5050/api/auth/register", form);
-      alert("Registered. Now log in.");
-    } catch (err) {
-      alert("Registration failed");
+  const handleLogin = async () => {
+    // Simulate login (replace with actual API call)
+    if (username.trim() && password.trim()) {
+      localStorage.setItem("username", username); // Save username to localStorage
+      setUsername(username); // Update state in App
+      navigate("/"); // Redirect to Home
     }
   };
 
   return (
     <div>
-      <h1>🔐 Login</h1>
-      <form onSubmit={handleLogin}>
-        <input placeholder="Username" onChange={(e) => setForm({ ...form, username: e.target.value })} />
-        <input placeholder="Password" type="password" onChange={(e) => setForm({ ...form, password: e.target.value })} />
-        <button type="submit">Login</button>
-        <button type="button" onClick={handleRegister}>Register</button>
-      </form>
+      <h1>Sign In</h1>
+      <input
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setLocalUsername(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={handleLogin}>Sign In</button>
     </div>
   );
 }
