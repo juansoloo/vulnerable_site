@@ -9,7 +9,7 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", form);
+      const res = await axios.post("http://localhost:5050/api/auth/login", form);
       localStorage.setItem("username", res.data.username);
       navigate("/blog");
     } catch (err) {
@@ -19,7 +19,7 @@ export default function Login() {
 
   const handleRegister = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/register", form);
+      await axios.post("http://localhost:5050/api/auth/register", form);
       alert("Registered. Now log in.");
     } catch (err) {
       alert("Registration failed");

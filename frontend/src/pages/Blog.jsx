@@ -7,7 +7,7 @@ export default function Blog() {
   const [newPost, setNewPost] = useState({ title: "", body: "" });
 
   const fetchPosts = async () => {
-    const res = await axios.get("http://localhost:5000/api/posts");
+    const res = await axios.get("http://localhost:5050/api/posts");
     setPosts(res.data);
   };
 
@@ -16,7 +16,7 @@ export default function Blog() {
   }, []);
 
   const createPost = async () => {
-    await axios.post("http://localhost:5000/api/posts", {
+    await axios.post("http://localhost:5050/api/posts", {
       ...newPost,
       author: username,
     });
@@ -25,7 +25,7 @@ export default function Blog() {
   };
 
   const addComment = async (postId, comment) => {
-    await axios.post(`http://localhost:5000/api/posts/${postId}/comments`, {
+    await axios.post(`http://localhost:5050/api/posts/${postId}/comments`, {
       author: username,
       content: comment,
     });
