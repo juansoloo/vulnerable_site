@@ -7,8 +7,12 @@ export default function Blog() {
   const [newPost, setNewPost] = useState({ title: "", body: "" });
 
   const fetchPosts = async () => {
-    const res = await axios.get("http://localhost:5050/api/posts");
-    setPosts(res.data);
+    try {      const res = await axios.get("http://localhost:5050/api/posts");
+      console.log("Fetched posts:", res.data); // Debugging
+      setPosts(res.data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
   };
 
   useEffect(() => {
@@ -24,11 +28,21 @@ export default function Blog() {
     fetchPosts();
   };
 
+  const deletePost = async (postId) => {
+    await axios.delete(`http://localhost:5050/api/posts/${postId}`);
+    fetchPosts();
+  };
+
   const addComment = async (postId, comment) => {
     await axios.post(`http://localhost:5050/api/posts/${postId}/comments`, {
       author: username,
       content: comment,
     });
+    fetchPosts();
+  };
+
+  const deleteComment = async (postId, commentId) => {
+    await axios.delete(`http://localhost:5050/api/posts/${postId}/comments/${commentId}`);
     fetchPosts();
   };
 
@@ -52,20 +66,43 @@ export default function Blog() {
 
       <hr />
 
-      {posts.map((post) => (
-        <div key={post._id} style={{ border: "1px solid black", marginBottom: "1rem", padding: "0.5rem" }}>
-          <h3>{post.title}</h3>
-          <p dangerouslySetInnerHTML={{ __html: post.body }}></p>
-          <small>By: {post.author}</small>
+      {posts.length === 0 ? (
+        <p>No posts available. Create one!</p>
+      ) : (
+        posts.map((post) => (
+          <div key={post._id} style={{ border: "1px solid black", marginBottom: "1rem", padding: "0.5rem" }}>
+            <h3>{post.title}</h3>
+            <p dangerouslySetInnerHTML={{ __html: post.body }}></p>
+            <small>By: {post.author}</small>
+            {post.author === username && (
+              <button onClick={() => deletePost(post._id)} style={{ marginLeft: "1rem", color: "red" }}>
+                Delete Post
+              </button>
+            )}
 
-          <h4>Comments</h4>
-          {post.comments.map((c, i) => (
-            <p key={i}><b>{c.author}:</b> <span dangerouslySetInnerHTML={{ __html: c.content }} /></p>
-          ))}
+            <h4>Comments</h4>
+            {post.comments.length === 0 ? (
+              <p>No comments yet. Be the first to comment!</p>
+            ) : (
+              post.comments.map((c) => (
+                <p key={c._id}>
+                  <b>{c.author}:</b> <span dangerouslySetInnerHTML={{ __html: c.content }} />
+                  {c.author === username && (
+                    <button
+                      onClick={() => deleteComment(post._id, c._id)}
+                      style={{ marginLeft: "1rem", color: "red" }}
+                    >
+                      Delete Comment
+                    </button>
+                  )}
+                </p>
+              ))
+            )}
 
-          <AddCommentForm postId={post._id} onComment={addComment} />
-        </div>
-      ))}
+            <AddCommentForm postId={post._id} onComment={addComment} />
+          </div>
+        ))
+      )}
     </div>
   );
 }
