@@ -5,28 +5,38 @@ export default function WeatherPhenomena() {
     const username = localStorage.getItem("username");
     const [items, setItems] = useState([]);
     const [form, setForm] = useState({ title: "", description: "", imageUrl: "", link: "" });
-    const [search, setSearch] = useState("");
+    const [searchInput, setSearchInput] = useState("");
+    const [search, setSearch] = useState(""); // This triggers the search
     const [randomItem, setRandomItem] = useState(null);
 
-    const fetchItems = async () => {
-        const url = search
-            ? `http://localhost:5050/api/weather?title=${encodeURIComponent(search)}&t=${Date.now()}`
+    const fetchItems = async (query = "") => {
+        const url = query
+            ? `http://localhost:5050/api/weather?title=${encodeURIComponent(query)}`
             : "http://localhost:5050/api/weather";
-
 
         const res = await axios.get(url);
         setItems(res.data);
 
-        // Pick a random item only when search is empty and no item selected yet
-        if (!search && res.data.length > 0) {
+        if (!query && res.data.length > 0) {
             const idx = Math.floor(Math.random() * res.data.length);
             setRandomItem(res.data[idx]);
         } else {
-            setRandomItem(null); // Reset random if search is used
+            setRandomItem(null);
         }
     };
 
-    useEffect(() => { fetchItems(); }, [search]);
+    useEffect(() => { fetchItems(search); }, [search]);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setSearch(searchInput);
+    };
+
+    const handleInputKeyDown = (e) => {
+        if (e.key === "Enter") {
+            setSearch(searchInput);
+        }
+    };
 
     const submit = async () => {
         if (!username) {
@@ -35,11 +45,12 @@ export default function WeatherPhenomena() {
         }
         await axios.post("http://localhost:5050/api/weather", { ...form, author: username });
         setForm({ title: "", description: "", imageUrl: "", link: "" });
-        setRandomItem(null); // Reset random item so a new one is picked after submit
-        fetchItems();
+        setRandomItem(null);
+        fetchItems("");
+        setSearchInput("");
+        setSearch("");
     };
 
-    // Filter items by search term (case-insensitive, matches title or description)
     const filteredItems = items.filter(
         (item) =>
             item.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -49,12 +60,16 @@ export default function WeatherPhenomena() {
     return (
         <div>
             <h1>Weather Phenomena</h1>
-            <input
-                placeholder="Search phenomena..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                style={{ marginBottom: "1rem", width: "100%" }}
-            />
+            <form onSubmit={handleSearch}>
+                <input
+                    placeholder="Search phenomena..."
+                    value={searchInput}
+                    onChange={e => setSearchInput(e.target.value)}
+                    onKeyDown={handleInputKeyDown}
+                    style={{ marginBottom: "1rem", width: "100%" }}
+                />
+                <button type="submit">Search</button>
+            </form>
             <h3>Submit New Phenomenon</h3>
             <input
                 placeholder="Title"
@@ -83,7 +98,6 @@ export default function WeatherPhenomena() {
             <button onClick={submit} disabled={!username}>Submit</button>
             <hr />
 
-            {/* Show ONLY random phenomenon if no search, otherwise ONLY search results */}
             {search === "" ? (
                 randomItem && (
                     <div style={{ border: "2px solid #0077cc", margin: "1rem 0", padding: "1rem", background: "#f0f8ff" }}>
