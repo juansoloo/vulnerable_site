@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Login({ setUsername }) {
   const [username, setLocalUsername] = useState("");
@@ -7,11 +8,22 @@ export default function Login({ setUsername }) {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    // Simulate login (replace with actual API call)
     if (username.trim() && password.trim()) {
-      localStorage.setItem("username", username); // Save username to localStorage
-      setUsername(username); // Update state in App
-      navigate("/"); // Redirect to Home
+      try {
+        const res = await axios.post("http://localhost:5050/api/auth/login", {
+          username,
+          password,
+        });
+        if (res.data.success) {
+          localStorage.setItem("username", username);
+          setUsername(username);
+          navigate("/");
+        } else {
+          alert("Invalid credentials");
+        }
+      } catch (err) {
+        alert("Login failed");
+      }
     }
   };
 

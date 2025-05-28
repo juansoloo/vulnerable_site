@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/vulnerable_site', {
+mongoose.connect('mongodb://localhost:27017/vuln_blog', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
