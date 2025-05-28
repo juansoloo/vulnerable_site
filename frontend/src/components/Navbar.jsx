@@ -18,6 +18,7 @@ export default function Navbar({ username, onSignOut }) {
       <div>
         {location.pathname !== "/" && <Link to="/">Home</Link>} {/* Show Home link if not on Home */}
         {location.pathname !== "/blog" && <Link to="/blog" style={{ marginLeft: "1rem" }}>Blog</Link>} {/* Show Blog link if not on Blog */}
+        {location.pathname !== "/weather" && <Link to="/weather" style={{ marginLeft: "1rem" }}>Weather</Link>} {/* Show Weather link if not on Weather */}
       </div>
       <div>
         {username ? (

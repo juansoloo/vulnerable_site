@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Blog from "./pages/Blog";
 import Login from "./pages/Login";
+import WeatherPhenomena from "./pages/WeatherPhenomena";
 
 function App() {
   const [username, setUsername] = useState(localStorage.getItem("username"));
@@ -20,6 +21,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/login" element={<Login setUsername={setUsername} />} />
+        <Route path="/weather" element={<WeatherPhenomena />} />
       </Routes>
     </Router>
   );
