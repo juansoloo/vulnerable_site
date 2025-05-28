@@ -20,6 +20,10 @@ export default function Blog() {
   }, []);
 
   const createPost = async () => {
+    if (!username) {
+      alert("You must be signed in to create a post.");
+      return;
+    }
     await axios.post("http://localhost:5050/api/posts", {
       ...newPost,
       author: username,
@@ -58,15 +62,18 @@ export default function Blog() {
         placeholder="Title"
         value={newPost.title}
         onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+        disabled={!username}
       />
       <br />
       <textarea
         placeholder="Body"
         value={newPost.body}
         onChange={(e) => setNewPost({ ...newPost, body: e.target.value })}
+        disabled={!username}
       />
       <br />
-      <button onClick={createPost}>Submit Post</button>
+      <button onClick={createPost} disabled={!username}>Submit Post</button>
+      {/* {!username && <div style={{ color: "red" }}>Sign in to create a post</div>} */}
 
       <hr />
 
@@ -135,7 +142,7 @@ function AddCommentForm({ postId, onComment }) {
         disabled={!username}
       />
       <button onClick={submit} disabled={!username}>Post</button>
-      {!username && <div style={{ color: "red" }}>Sign in to comment</div>}
+      {/* {!username && <div style={{ color: "red" }}>Sign in to comment</div>} */}
     </div>
   );
 }
