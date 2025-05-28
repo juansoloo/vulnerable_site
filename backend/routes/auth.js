@@ -22,4 +22,22 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Register new user
+router.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    // Check if user already exists
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.json({ success: false, message: 'Username already taken' });
+    }
+    // Create new user
+    const user = new User({ username, password });
+    await user.save();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;
