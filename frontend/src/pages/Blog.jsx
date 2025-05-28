@@ -34,6 +34,10 @@ export default function Blog() {
   };
 
   const addComment = async (postId, comment) => {
+    if (!username) {
+      alert("You must be signed in to comment.");
+      return;
+    }
     await axios.post(`http://localhost:5050/api/posts/${postId}/comments`, {
       author: username,
       content: comment,
@@ -109,8 +113,13 @@ export default function Blog() {
 
 function AddCommentForm({ postId, onComment }) {
   const [comment, setComment] = useState("");
+  const username = localStorage.getItem("username");
 
   const submit = () => {
+    if (!username) {
+      alert("You must be signed in to comment.");
+      return;
+    }
     if (comment.trim()) {
       onComment(postId, comment);
       setComment("");
@@ -123,8 +132,10 @@ function AddCommentForm({ postId, onComment }) {
         placeholder="Add comment"
         value={comment}
         onChange={(e) => setComment(e.target.value)}
+        disabled={!username}
       />
-      <button onClick={submit}>Post</button>
+      <button onClick={submit} disabled={!username}>Post</button>
+      {!username && <div style={{ color: "red" }}>Sign in to comment</div>}
     </div>
   );
 }
