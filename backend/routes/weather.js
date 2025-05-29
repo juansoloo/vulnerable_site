@@ -9,8 +9,9 @@ router.get('/', async (req, res) => {
     try {
         let items;
         if (title) {
-            // Simple case-insensitive search
-            items = await WeatherPhenomenon.find({ title: { $regex: title, $options: 'i' } });
+            items = await WeatherPhenomenon.find({
+                $where: `this.title.toLowerCase().includes("${title.toLowerCase()}")`
+            });
         } else {
             items = await WeatherPhenomenon.find();
         }
@@ -19,6 +20,7 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch items' });
     }
 });
+
 
 // Add new
 router.post('/', async (req, res) => {

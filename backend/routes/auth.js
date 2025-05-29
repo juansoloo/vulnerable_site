@@ -2,42 +2,70 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
+// 🚪 Login (NoSQL injectable)
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  console.log('Login attempt:', { username, password });
   try {
-    const user = await User.findOne({ username });
-    console.log('Login attempt:', { username, password });
+    const user = await User.findOne({ username, password });
+    console.log('User found:', user);
     if (!user) {
-      console.log('User not found');
-      return res.json({ success: false, message: 'User not found' });
+      return res.json({ success: false, message: 'Invalid credentials' });
     }
-    console.log('DB user:', user);
-    if (user.password !== password) {
-      console.log('Password mismatch:', user.password, password);
-      return res.json({ success: false, message: 'Incorrect password' });
+
+    // Set session
+    req.session.user = {
+      id: user._id,
+      username: user.username
+    };
+
+    console.log('Login success:', user.username);
+
+    // Redirect to dashboard
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Register
+router.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.json({ success: false, message: 'Username already taken' });
     }
+
+    const user = new User({ username, password });
+    await user.save();
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Register new user
-router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    // Check if user already exists
-    const existing = await User.findOne({ username });
-    if (existing) {
-      return res.json({ success: false, message: 'Username already taken' });
-    }
-    // Create new user
-    const user = new User({ username, password });
-    await user.save();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+// Dashboard
+router.get('/dashboard', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send('<h1>Not logged in</h1><a href="/">Go home</a>');
   }
+
+  res.send(`
+    <h1>Welcome, ${req.session.user.username}</h1>
+    <p>You are now logged in via session!</p>
+    <a href="/api/auth/logout">Logout</a>
+  `);
+});
+
+// Logout
+router.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/');
+  });
 });
 
 module.exports = router;

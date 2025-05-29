@@ -3,75 +3,78 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function Login({ setUsername }) {
-  const [username, setLocalUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [registerMode, setRegisterMode] = useState(false);
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    if (username.trim() && password.trim()) {
-      try {
-        const res = await axios.post("http://localhost:5050/api/auth/login", {
-          username,
-          password,
-        });
-        if (res.data.success) {
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAuth = async () => {
+    const endpoint = isRegistering ? "register" : "login";
+    const { username, password } = form;
+
+    if (!username.trim() || !password.trim()) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `http://localhost:5050/api/auth/${endpoint}`,
+        { username, password },
+        { withCredentials: true }
+      );
+
+      console.log("Full response:", res);
+      console.log("Response data:", res.data);
+
+      if (res.data.success) {
+        if (!isRegistering) {
           localStorage.setItem("username", username);
           setUsername(username);
-          navigate("/");
+          console.log('Redirecting to login')
+          navigate("/dashboard"); // Redirect after login
         } else {
-          alert("Invalid credentials");
+          alert("Registration successful. You can now log in.");
+          setIsRegistering(false);
+          setForm({ username: "", password: "" });
         }
-      } catch (err) {
-        alert("Login failed");
+      } else {
+        alert(res.data.message || "Authentication failed.");
       }
+    } catch (err) {
+      alert("Server error.");
+      console.error(err);
     }
   };
 
-  const handleRegister = async () => {
-    if (username.trim() && password.trim()) {
-      try {
-        const res = await axios.post("http://localhost:5050/api/auth/register", {
-          username,
-          password,
-        });
-        if (res.data.success) {
-          alert("Registration successful! You can now log in.");
-          setRegisterMode(false);
-        } else {
-          alert(res.data.message || "Registration failed");
-        }
-      } catch (err) {
-        alert("Registration failed");
-      }
-    }
-  };
 
   return (
-    <div>
-      <h1>{registerMode ? "Register" : "Sign In"}</h1>
+    <div style={{ maxWidth: "400px", margin: "2rem auto", textAlign: "center" }}>
+      <h2>{isRegistering ? "Create an Account" : "Sign In"}</h2>
       <input
+        name="username"
         placeholder="Username"
-        value={username}
-        onChange={(e) => setLocalUsername(e.target.value)}
+        value={form.username}
+        onChange={handleChange}
+        style={{ display: "block", width: "100%", marginBottom: "1rem" }}
       />
       <input
+        name="password"
         type="password"
         placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        value={form.password}
+        onChange={handleChange}
+        style={{ display: "block", width: "100%", marginBottom: "1rem" }}
       />
-      {registerMode ? (
-        <>
-          <button onClick={handleRegister}>Register</button>
-          <button onClick={() => setRegisterMode(false)}>Back to Login</button>
-        </>
-      ) : (
-        <>
-          <button onClick={handleLogin}>Sign In</button>
-          <button onClick={() => setRegisterMode(true)}>Create Account</button>
-        </>
-      )}
+      <button onClick={handleAuth} style={{ marginRight: "1rem" }}>
+        {isRegistering ? "Register" : "Login"}
+      </button>
+      <button onClick={() => setIsRegistering(!isRegistering)}>
+        {isRegistering ? "Back to Login" : "Create Account"}
+      </button>
     </div>
   );
 }
