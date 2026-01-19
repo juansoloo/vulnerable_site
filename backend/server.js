@@ -12,11 +12,12 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.use(cors({
-  origin: 'http://localhost:8081', // your frontend URL
+  origin: 'http://localhost:8081',
   credentials: true
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
 
 app.use(session({
   secret: 'insecure-secret',

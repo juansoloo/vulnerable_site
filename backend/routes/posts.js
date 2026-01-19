@@ -14,6 +14,10 @@ router.get('/', async (req, res) => {
 
 // POST a new post
 router.post('/', async (req, res) => {
+  console.log('Content-Type:', req.headers['content-type']);
+  console.log('Raw body    :', req.rawBody);   // if you capture it
+  console.log('Parsed body :', req.body);
+
   const { title, body, author } = req.body;
   try {
     const newPost = new Post({ title, body, author });
